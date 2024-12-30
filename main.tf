@@ -2,9 +2,9 @@ resource "aws_ecs_cluster" "ecs_cluster" {
   for_each = var.ecs_resources
   name     = each.value.ecs_cluster_name
   tags = {
-    "Name"      = each.value.name
-    "Environment"       = each.value.env
-    "terraform" = "true"
+    "Name"        = each.value.name
+    "Environment" = each.value.env
+    "terraform"   = "true"
   }
 }
 
@@ -19,10 +19,10 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
     cpu_architecture        = lookup(each.value, "ecs_cpu_architecture", "X86_64")
   }
 
-  cpu                   = each.value.ecs_task_def_cpu
-  memory                = each.value.ecs_task_def_memory
-  task_role_arn         = lookup(each.value, "ecs_task_def_task_role_arn", null)
-  execution_role_arn    = each.value.ecs_task_def_execution_role_arn
+  cpu                = each.value.ecs_task_def_cpu
+  memory             = each.value.ecs_task_def_memory
+  task_role_arn      = lookup(each.value, "ecs_task_def_task_role_arn", null)
+  execution_role_arn = each.value.ecs_task_def_execution_role_arn
   container_definitions = jsonencode([
     {
       name              = each.value.ecs_task_def_container_name
@@ -30,11 +30,11 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
       cpu               = lookup(each.value, "ecs_container_cpu", null)
       memoryReservation = lookup(each.value, "ecs_container_memory_reservation", null)
       essential         = true
-      portMappings      = each.value.ecs_task_def_container_port != null ? [
+      portMappings = each.value.ecs_task_def_container_port != null ? [
         {
           containerPort = each.value.ecs_task_def_container_port
           hostPort      = each.value.ecs_task_def_host_port
-        } 
+        }
       ] : []
       logConfiguration = {
         logDriver = "awslogs"
@@ -48,9 +48,9 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   ])
   skip_destroy = true
   tags = {
-    "Name"      = each.value.name
-    "Environment"       = each.value.env
-    "terraform" = "true"
+    "Name"        = each.value.name
+    "Environment" = each.value.env
+    "terraform"   = "true"
   }
 }
 
@@ -60,11 +60,11 @@ resource "aws_ecs_service" "ecs_service" {
   cluster         = aws_ecs_cluster.ecs_cluster[each.key].id
   launch_type     = each.value.ecs_launch_type
   task_definition = aws_ecs_task_definition.ecs_task_definition[each.key].arn
-  desired_count   = each.value.ecs_desired_count
+  desired_count   = var.ecs_desired_count
 
   network_configuration {
-    subnets         = var.subnet_ids
-    security_groups = each.value.ecs_security_group
+    subnets          = var.subnet_ids
+    security_groups  = each.value.ecs_security_group
     assign_public_ip = true
   }
 
@@ -84,14 +84,14 @@ resource "aws_ecs_service" "ecs_service" {
   enable_ecs_managed_tags = true
   enable_execute_command  = true
   tags = {
-    "Name"      = each.value.name
-    "Environment"       = each.value.env
-    "terraform" = "true"
+    "Name"        = each.value.name
+    "Environment" = each.value.env
+    "terraform"   = "true"
   }
 }
 
 resource "aws_appautoscaling_target" "ecs_target" {
-  for_each = var.ecs_resources
+  for_each           = var.ecs_resources
   max_capacity       = var.ecs_asg_max_size
   min_capacity       = var.ecs_asg_min_size
   resource_id        = "service/${aws_ecs_cluster.ecs_cluster[each.key].name}/${aws_ecs_service.ecs_service[each.key].name}"
@@ -100,12 +100,12 @@ resource "aws_appautoscaling_target" "ecs_target" {
 }
 
 resource "aws_appautoscaling_policy" "ecs_policy_memory" {
-  for_each = var.ecs_resources
-  name     = "memory-autoscaling-${each.key}"
-  policy_type                            = "TargetTrackingScaling"
-  resource_id                            = aws_appautoscaling_target.ecs_target[each.key].resource_id
-  scalable_dimension                     = aws_appautoscaling_target.ecs_target[each.key].scalable_dimension
-  service_namespace                      = aws_appautoscaling_target.ecs_target[each.key].service_namespace
+  for_each           = var.ecs_resources
+  name               = "memory-autoscaling-${each.key}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target[each.key].resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target[each.key].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target[each.key].service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
@@ -116,12 +116,12 @@ resource "aws_appautoscaling_policy" "ecs_policy_memory" {
 }
 
 resource "aws_appautoscaling_policy" "ecs_policy_cpu" {
-  for_each = var.ecs_resources
-  name     = "cpu-autoscaling-${each.key}"
-  policy_type                            = "TargetTrackingScaling"
-  resource_id                            = aws_appautoscaling_target.ecs_target[each.key].resource_id
-  scalable_dimension                     = aws_appautoscaling_target.ecs_target[each.key].scalable_dimension
-  service_namespace                      = aws_appautoscaling_target.ecs_target[each.key].service_namespace
+  for_each           = var.ecs_resources
+  name               = "cpu-autoscaling-${each.key}"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target[each.key].resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target[each.key].scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target[each.key].service_namespace
 
   target_tracking_scaling_policy_configuration {
     predefined_metric_specification {
