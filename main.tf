@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
   name     = each.value.ecs_cluster_name
   tags = {
     "Name"      = each.value.name
-    "Env"       = each.value.env
+    "Environment"       = each.value.environment
     "terraform" = "true"
   }
 }
@@ -49,7 +49,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   skip_destroy = true
   tags = {
     "Name"      = each.value.name
-    "Env"       = each.value.env
+    "Environment"       = each.value.environment
     "terraform" = "true"
   }
 }
@@ -85,7 +85,7 @@ resource "aws_ecs_service" "ecs_service" {
   enable_execute_command  = true
   tags = {
     "Name"      = each.value.name
-    "Env"       = each.value.env
+    "Environment"       = each.value.environment
     "terraform" = "true"
   }
 }
