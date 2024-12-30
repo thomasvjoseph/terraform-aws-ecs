@@ -14,7 +14,6 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   network_mode             = each.value.ecs_task_def_network_mode
   requires_compatibilities = each.value.ecs_task_requires_compatibilities
 
-  # Optional fields with defaults
   runtime_platform {
     operating_system_family = lookup(each.value, "ecs_os_family", "LINUX")
     cpu_architecture        = lookup(each.value, "ecs_cpu_architecture", "X86_64")
@@ -22,13 +21,12 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
   cpu                   = each.value.ecs_task_def_cpu
   memory                = each.value.ecs_task_def_memory
-  task_role_arn         = lookup(each.value, "ecs_task_def_task_role_arn", null) # Optional
+  task_role_arn         = lookup(each.value, "ecs_task_def_task_role_arn", null)
   execution_role_arn    = each.value.ecs_task_def_execution_role_arn
   container_definitions = jsonencode([
     {
       name              = each.value.ecs_task_def_container_name
       image             = each.value.ecs_image_url
-      # Optional container CPU and memory reservation
       cpu               = lookup(each.value, "ecs_container_cpu", null)
       memoryReservation = lookup(each.value, "ecs_container_memory_reservation", null)
       essential         = true
@@ -57,12 +55,12 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  for_each          = var.ecs_resources
-  name              = each.value.ecs_service_name
-  cluster           = aws_ecs_cluster.ecs_cluster[each.key].id
-  launch_type       = each.value.ecs_launch_type
-  task_definition   = aws_ecs_task_definition.ecs_task_definition[each.key].arn
-  desired_count     = each.value.ecs_desired_count
+  for_each        = var.ecs_resources
+  name            = each.value.ecs_service_name
+  cluster         = aws_ecs_cluster.ecs_cluster[each.key].id
+  launch_type     = each.value.ecs_launch_type
+  task_definition = aws_ecs_task_definition.ecs_task_definition[each.key].arn
+  desired_count   = each.value.ecs_desired_count
 
   network_configuration {
     subnets         = var.subnet_ids
@@ -92,15 +90,14 @@ resource "aws_ecs_service" "ecs_service" {
   }
 }
 
-# Optional Autoscaling Target
 resource "aws_appautoscaling_target" "ecs_target" {
   for_each = var.ecs_resources
-  count    = var.enable_autoscaling ? 1 : 0 # Controlled by optional autoscaling flag
-  max_capacity        = var.ecs_asg_max_size
-  min_capacity        = var.ecs_asg_min_size
-  resource_id         = "service/${aws_ecs_cluster.ecs_cluster[each.key].name}/${aws_ecs_service.ecs_service[each.key].name}"
-  scalable_dimension  = "ecs:service:DesiredCount"
-  service_namespace   = "ecs"
+  count    = var.enable_autoscaling ? 1 : 0
+  max_capacity       = var.ecs_asg_max_size
+  min_capacity       = var.ecs_asg_min_size
+  resource_id        = "service/${aws_ecs_cluster.ecs_cluster[each.key].name}/${aws_ecs_service.ecs_service[each.key].name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
 }
 
 resource "aws_appautoscaling_policy" "ecs_policy_memory" {
