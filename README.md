@@ -98,23 +98,9 @@ module "ecs" {
 |ecs_autoscaling_policy_cpu_arn	| The ARN of the ECS CPU autoscaling policy. |
 
 
-
-## Prerequisites
-
-	•	Terraform 0.12 or later
-	•	AWS credentials configured with appropriate permissions to create S3 buckets, CloudFront distributions, and policies.
-Manual Steps (if needed)
-
-If your CloudFront distribution encounters issues (e.g., Access Denied errors), follow these steps:
-
-	1.	Navigate to the AWS Console.
-	2.	Manually create a CloudFront Origin Access Identity (OAI).
-	3.	Update the S3 bucket policy to allow the new OAI to access the S3 bucket.
-	4.	Remove the old S3 bucket policy created by Terraform, if applicable.
-
 ## License
 
-This module is licensed under the MIT License.
+This module is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 
 ## Author: 
 
