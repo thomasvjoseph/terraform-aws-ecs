@@ -1,11 +1,7 @@
 resource "aws_ecs_cluster" "ecs_cluster" {
   for_each = var.ecs_resources
   name     = each.value.ecs_cluster_name
-  tags = {
-    "Name"        = each.value.name
-    "Environment" = each.value.env
-    "terraform"   = "true"
-  }
+  tags     = var.tags
 }
 
 resource "aws_ecs_task_definition" "ecs_task_definition" {
@@ -47,11 +43,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
     }
   ])
   skip_destroy = true
-  tags = {
-    "Name"        = each.value.name
-    "Environment" = each.value.env
-    "terraform"   = "true"
-  }
+   tags            = var.tags
 }
 
 resource "aws_ecs_service" "ecs_service" {
@@ -83,11 +75,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   enable_ecs_managed_tags = true
   enable_execute_command  = true
-  tags = {
-    "Name"        = each.value.name
-    "Environment" = each.value.env
-    "terraform"   = "true"
-  }
+   tags                   = var.tags
 }
 
 resource "aws_appautoscaling_target" "ecs_target" {

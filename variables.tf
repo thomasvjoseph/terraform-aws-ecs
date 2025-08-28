@@ -1,8 +1,6 @@
 variable "ecs_resources" {
   type = map(object({
     ecs_cluster_name                  = string
-    name                              = string
-    environment                       = string
     ecs_task_def_family               = string
     ecs_task_def_network_mode         = string
     ecs_task_requires_compatibilities = list(string)
@@ -78,4 +76,10 @@ variable "memory_target_value" {
   type        = number
   description = "Target value for memory utilization-based autoscaling. Optional, defaults to 85%."
   default     = 85
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = {}
+  description = "A map of tags to assign to the virtual network resource."
 }
