@@ -11,8 +11,6 @@ module "ecs" {
   ecs_resources = {
     example = {
       ecs_cluster_name                = "example-cluster"
-      name                            = "example"
-      env                             = "dev"
       ecs_task_def_family             = "example-family"
       ecs_task_def_network_mode       = "awsvpc"
       ecs_task_requires_compatibilities = ["FARGATE"]
@@ -40,6 +38,9 @@ module "ecs" {
   enable_memory_autoscaling = true
   cpu_target_value = 70
   memory_target_value = 85
+  tags ={
+    Environment = "Development"
+  }
 }
 ```
 ## Inputs
