@@ -1,6 +1,9 @@
 variable "ecs_resources" {
+  description = "Map of ECS resources, including cluster, task definition, and service configuration."
   type = map(object({
-    ecs_cluster_name                  = string
+    # cluster
+    ecs_cluster_name = string
+    # task definition
     ecs_task_def_family               = string
     ecs_task_def_network_mode         = string
     ecs_task_requires_compatibilities = list(string)
@@ -18,68 +21,30 @@ variable "ecs_resources" {
     ecs_task_def_host_port            = optional(number, null)
     ecs_awslogs_group                 = string
     aws_region                        = string
-    ecs_service_name                  = string
-    ecs_launch_type                   = string
-    ecs_security_group                = list(string)
-    ecs_target_group_arn              = optional(string, "")
-    ecs_service_container_name        = string
-    ecs_service_container_port        = number
+    # service
+    ecs_service_name           = string
+    ecs_launch_type            = string
+    ecs_security_group         = list(string)
+    ecs_target_group_arn       = optional(string, "")
+    ecs_service_container_name = string
+    ecs_service_container_port = number
+    subnet_ids                 = list(string)
+    assign_public_ip           = optional(bool, false)
+    desired_count              = optional(number, 1)
+    # autoscaling
+    enable_autoscaling        = optional(bool, false)
+    enable_cpu_autoscaling    = optional(bool, false)
+    enable_memory_autoscaling = optional(bool, false)
+    asg_max_size              = optional(number, 2)
+    asg_min_size              = optional(number, 1)
+    cpu_target_value          = optional(number, 70)
+    memory_target_value       = optional(number, 85)
+    tags                      = optional(map(string), {})
   }))
-  description = "Map of ECS resources, including cluster, task definition, and service configuration."
-}
-
-variable "subnet_ids" {
-  type        = list(string)
-  description = "List of subnet IDs for the ECS tasks. This is required for Fargate to define where the service runs."
-}
-variable "ecs_desired_count" {
-  type        = number
-  description = "Desired number of tasks for the ECS service."
-  default     = 1
-
-}
-variable "ecs_asg_max_size" {
-  type        = number
-  description = "Maximum number of tasks for autoscaling. This is used for defining the scaling limits of the service."
-}
-
-variable "ecs_asg_min_size" {
-  type        = number
-  description = "Minimum number of tasks for autoscaling. This is used for defining the scaling limits of the service."
-}
-
-variable "enable_autoscaling" {
-  type        = bool
-  description = "Flag to enable or disable autoscaling for the ECS service. Optional, defaults to 'false'."
-  default     = false
-}
-
-variable "enable_cpu_autoscaling" {
-  type        = bool
-  description = "Flag to enable CPU-based autoscaling. Optional, defaults to 'false'. Requires 'enable_autoscaling' to be 'true'."
-  default     = false
-}
-
-variable "enable_memory_autoscaling" {
-  type        = bool
-  description = "Flag to enable memory-based autoscaling. Optional, defaults to 'false'. Requires 'enable_autoscaling' to be 'true'."
-  default     = false
-}
-
-variable "cpu_target_value" {
-  type        = number
-  description = "Target value for CPU utilization-based autoscaling. Optional, defaults to 70%."
-  default     = 70
-}
-
-variable "memory_target_value" {
-  type        = number
-  description = "Target value for memory utilization-based autoscaling. Optional, defaults to 85%."
-  default     = 85
 }
 
 variable "tags" {
   type        = map(string)
   default     = {}
-  description = "A map of tags to assign to the virtual network resource."
+  description = "Tags applied to all resources."
 }
